@@ -1,4 +1,5 @@
 const express = require("express");
+const redis = require("redis");
 const axios = require("axios").default;
 const router = express.Router();
 const cheerio = require("cheerio");
@@ -8,7 +9,8 @@ const ical = require("node-ical");
 router.get('/', function(req, response, next) {
   response.render('index', { title: 'Express' });
   App.setPlayers(req.query.players);
-  //App.getLiquipediaMatches()
+  App.getData();
+  App.scrapeData();
 });
 
 /**
@@ -16,16 +18,9 @@ router.get('/', function(req, response, next) {
  */
 class App {
 
-    /**
-     * HTML page
-     * @type {string}
-     */
+    static EXPIRE_TIME = 300;
     static data = "";
-
-    /**
-     * Players list (from querystring)
-     * @type {[]}
-     */
+    static client = redis.createClient();
     static players = [];
 
     /**
@@ -34,26 +29,8 @@ class App {
      * @returns {string}
      */
     static getData() {
-        return App.data;
-    }
-
-    /**
-     * Setter for App.data and for Redis
-     * @param d
-     */
-    static setData(d) {
-        App.data = d;
-    }
-
-    /**
-     * Setter for App.players from Express querystring
-     * @param p
-     */
-    static setPlayers(p) {
-        App.players = [];
-        for (const player of p) {
-            App.players.push(player);
-        }
+        const d = App.client.get("data");
+        return d != null ? d : App.getLiquipediaMatches();
     }
 
     /**
@@ -75,8 +52,36 @@ class App {
             })
     }
 
+    /**
+     * Setter for Redis
+     * @param d
+     */
+    static setData(d) {
+        App.data = d;
+        App.client.setex("data", App.EXPIRE_TIME, d);
+    }
+
+    /**
+     * Setter for App.players from Express querystring
+     * @param p
+     */
+    static setPlayers(p) {
+        App.players = [];
+        for (const player of p) {
+            App.players.push(player);
+        }
+    }
+
     static scrapeData() {
-        let matches = App.get
+        const $ = cheerio.load(App.data);
+        for (let i = 0; i < App.players.length; i++) {
+            App.players[i] = "[title='" + App.players[i] + "']";
+        }
+        let selectorString = ", ".join(App.players);
+        const matches = $(".infobox_matches_content");
+        for (const match of matches) {
+
+        }
     }
 
     static generateEvent() {
