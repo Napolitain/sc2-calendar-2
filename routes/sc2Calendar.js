@@ -11,7 +11,7 @@ export class Sc2Calendar {
 	static #EXPIRE_TIME = 300;
 	static #data = "";
 	static #client = redis.createClient();
-	static players = [];
+	static #players = [];
 
 	/**
 	 * If data expired from Redis, calls Sc2Calendar.getLiquipediaMatches,
@@ -56,24 +56,42 @@ export class Sc2Calendar {
 	 * @param p
 	 */
 	static setPlayers(p) {
-		Sc2Calendar.players = [];
+		Sc2Calendar.#players = [];
 		for (const player of p) {
-			Sc2Calendar.players.push(player);
+			Sc2Calendar.#players.push(player);
 		}
 	}
 
+	/**
+	 * Scrape from data the matches we want to track.
+	 * Generate iCalendar event and return it.
+	 * @returns {string}
+	 */
 	static scrapeData() {
 		const $ = cheerio.load(Sc2Calendar.#data);
-		for (let i = 0; i < Sc2Calendar.players.length; i++) {
-			Sc2Calendar.players[i] = "[title='" + Sc2Calendar.players[i] + "']";
+		for (let i = 0; i < Sc2Calendar.#players.length; i++) {
+			Sc2Calendar.#players[i] = "[title='" + Sc2Calendar.#players[i] + "']";
 		}
-		let selectorString = Sc2Calendar.players.join(", ");
+		const selectorString = Sc2Calendar.#players.join(", ");
 		const matches = $(".infobox_matches_content");
+		let events = []; // list of events
 		for (const match of matches) {
+			const selected_match = match.find(selectorString); // if match contain a tracked player
+			if (selected_match) {
+				const teamleft = match.find(".team-left").text(); // Serral
+				const teamright = match.find(".team-right").text(); // Maru
+				const matchFormat = match.find(".versus").eq(1).text() // Bo5
+				const time = match.find("[data-timestamp]").attr("data-timestamp"); // 1601010021290
+				const tournament = match.find(".match-filler div div").text();
 
+			}
 		}
 	}
 
+	/**
+	 * Return an iCalendar event from scrapped data to be sent back.
+	 * @returns {string}
+	 */
 	static generateEvent() {
 		return ical({
 			domain: 'sc2calendar.com',
