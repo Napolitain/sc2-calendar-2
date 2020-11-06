@@ -8,9 +8,9 @@ const ical = require("ical-generator");
  */
 export class Sc2Calendar {
 
-	static EXPIRE_TIME = 300;
-	static data = "";
-	static client = redis.createClient();
+	static #EXPIRE_TIME = 300;
+	static #data = "";
+	static #client = redis.createClient();
 	static players = [];
 
 	/**
@@ -19,7 +19,7 @@ export class Sc2Calendar {
 	 * @returns {string}
 	 */
 	static getData() {
-		const d = Sc2Calendar.client.get("data");
+		const d = Sc2Calendar.#client.get("data");
 		return d != null ? d : Sc2Calendar.getLiquipediaMatches();
 	}
 
@@ -47,8 +47,8 @@ export class Sc2Calendar {
 	 * @param d
 	 */
 	static setData(d) {
-		Sc2Calendar.data = d;
-		Sc2Calendar.client.setex("data", Sc2Calendar.EXPIRE_TIME, d);
+		Sc2Calendar.#data = d;
+		Sc2Calendar.#client.setex("data", Sc2Calendar.#EXPIRE_TIME, d);
 	}
 
 	/**
@@ -63,7 +63,7 @@ export class Sc2Calendar {
 	}
 
 	static scrapeData() {
-		const $ = cheerio.load(Sc2Calendar.data);
+		const $ = cheerio.load(Sc2Calendar.#data);
 		for (let i = 0; i < Sc2Calendar.players.length; i++) {
 			Sc2Calendar.players[i] = "[title='" + Sc2Calendar.players[i] + "']";
 		}
