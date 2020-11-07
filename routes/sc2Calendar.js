@@ -65,46 +65,38 @@ export class Sc2Calendar {
 	/**
 	 * Scrape from data the matches we want to track.
 	 * Generate iCalendar event and return it.
-	 * @returns {string}
+	 * @returns {ical}
 	 */
-	static scrapeData() {
+	static getCalendar() {
 		const $ = cheerio.load(Sc2Calendar.#data);
 		for (let i = 0; i < Sc2Calendar.#players.length; i++) {
 			Sc2Calendar.#players[i] = "[title='" + Sc2Calendar.#players[i] + "']";
 		}
 		const selectorString = Sc2Calendar.#players.join(", ");
 		const matches = $(".infobox_matches_content");
-		let events = []; // list of events
+		let cal = ical({
+			domain: 'sc2calendar.com',
+			name: 'Sc2Calendar',
+		});
 		for (const match of matches) {
 			const selected_match = match.find(selectorString); // if match contain a tracked player
 			if (selected_match) {
 				const teamleft = match.find(".team-left").text(); // Serral
 				const teamright = match.find(".team-right").text(); // Maru
 				const matchFormat = match.find(".versus").eq(1).text() // Bo5
-				const time = match.find("[data-timestamp]").attr("data-timestamp"); // 1601010021290
+				const timeMatch = match.find("[data-timestamp]").attr("data-timestamp"); // 1601010021290
 				const tournament = match.find(".match-filler div div").text();
-
+				cal.createEvent({
+					summary: teamleft + "-" + teamright,
+					location: tournament + "(" + matchFormat + ")",
+					uid: (timeMatch + teamleft + teamright + tournament + "@sc2calendar").replace(" ", ""),
+					start: new Date(parseInt(timeMatch)),
+					end: new Date(parseInt(timeMatch) + 2400),
+					timestamp: new Date(Date.now()),
+				});
 			}
 		}
+		return cal;
 	}
 
-	/**
-	 * Return an iCalendar event from scrapped data to be sent back.
-	 * @returns {string}
-	 */
-	static generateEvent() {
-		return ical({
-			domain: 'sc2calendar.com',
-			prodId: '-//Sc2Calendar//en//',
-			events: [
-				{
-					start: moment(),
-					end: moment().add(1, 'hour'),
-					timestamp: moment(),
-					summary: 'My Event',
-					organizer: 'Sc2Calendar'
-				}
-			]
-		}).toString();
-	}
 }

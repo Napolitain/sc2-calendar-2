@@ -8,7 +8,7 @@ router.get('/', function(req, response, next) {
   response.render('index', { title: 'Express' });
   Sc2Calendar.setPlayers(req.query.players);
   Sc2Calendar.getData();
-  Sc2Calendar.scrapeData();
+  Sc2Calendar.getCalendar();
 });
 
 module.exports = router;
