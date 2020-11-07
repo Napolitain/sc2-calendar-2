@@ -15,12 +15,11 @@ export class Sc2Calendar {
 
 	/**
 	 * If data expired from Redis, calls Sc2Calendar.getLiquipediaMatches,
-	 * otherwise return Sc2Calendar.data
-	 * @returns {string}
+	 * otherwise setData with d
 	 */
 	static getData() {
 		const d = Sc2Calendar.#client.get("data");
-		return d != null ? d : Sc2Calendar.getLiquipediaMatches();
+		d != null ? this.setData(d) : Sc2Calendar.getLiquipediaMatches();
 	}
 
 	/**
@@ -100,3 +99,5 @@ export class Sc2Calendar {
 	}
 
 }
+
+module.exports = Sc2Calendar;

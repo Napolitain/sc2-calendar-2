@@ -5,10 +5,11 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, response, next) {
-  response.render('index', { title: 'Express' });
   Sc2Calendar.setPlayers(req.query.players);
   Sc2Calendar.getData();
-  Sc2Calendar.getCalendar();
+  const ical = Sc2Calendar.getCalendar();
+  response.set("Content-Disposition", "attachment; filename=sc2calendar.ics");
+  response.send(ical.toString());
 });
 
 module.exports = router;
