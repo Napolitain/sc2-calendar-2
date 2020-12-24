@@ -32,13 +32,11 @@ export class Sc2Calendar {
 				"Accept-Encoding": "gzip",
 				"User-Agent": "User-Agent\": \"Sc2Calendar/developer (mxboucher@gmail.com)"
 			},
+		}).then(function (response) {
+			Sc2Calendar.setData(response.data);
+		}).catch(function (error) {
+			console.error("Couldn't request to Liquipedia: ", error);
 		})
-			.then(function (response) {
-				Sc2Calendar.setData(response.data);
-			})
-			.catch(function (error) {
-				console.error("Couldn't request to Liquipedia: ", error);
-			})
 	}
 
 	/**
