@@ -19,7 +19,7 @@ export class Sc2Calendar {
 	 */
 	static getData() {
 		const d = Sc2Calendar.#client.get("data");
-		d != null ? this.setData(d) : Sc2Calendar.getLiquipediaMatches();
+		d != null ? Sc2Calendar.setData(d) : Sc2Calendar.getLiquipediaMatches();
 	}
 
 	/**
