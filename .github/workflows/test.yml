@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Caching
     steps:
-      - run: docker run --name sc2calendar-redis -p 6379:6379 -d redis
+      - run: "docker run --name sc2calendar-redis -p 6379:6379 -d redis"
         
   build:
     runs-on: ubuntu-latest
